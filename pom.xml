@@ -22,7 +22,7 @@
   <packaging>maven-plugin</packaging>
   <version>0.0.9-SNAPSHOT</version>
   <name>javafx-maven-plugin Maven Mojo</name>
-  <description>The JavaFX Plugin is used to run JavaFX 11+ projects</description>
+  <description>The JavaFX Plugin is used to run JavaFX 23+ projects</description>
   <inceptionYear>2019</inceptionYear>
 
   <url>https://openjfx.io</url>

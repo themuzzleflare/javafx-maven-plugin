@@ -64,7 +64,7 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
 
     private MockJavaFXRunMojo mojo;
 
-    private class MockJavaFXRunMojo extends JavaFXRunMojo {
+    private static class MockJavaFXRunMojo extends JavaFXRunMojo {
         public List<CommandLine> commandLines = new ArrayList<>();
         public String failureMsg;
         public int executeResult;
@@ -133,7 +133,7 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
         } catch (Exception e1) {
             e = e1;
         }
-        assertEquals (true, (e instanceof MojoExecutionException));
+        assertTrue((e instanceof MojoExecutionException));
     }
 
     protected JavaFXRunMojo getJavaFXRunMojo(File testPom) throws Exception {
@@ -150,9 +150,7 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
                     .map(d -> new DefaultArtifact(d.getGroupId(), d.getArtifactId(), d.getClassifier(), d.getType(), d.getVersion()))
                     .flatMap(a -> resolver.resolve(a).stream())
                     .collect(Collectors.toSet());
-            if (artifacts != null) {
-                project.setArtifacts(artifacts);
-            }
+            project.setArtifacts(artifacts);
         }
         setVariableValueToObject(mojo, "compilePath", project.getCompileClasspathElements());
         setVariableValueToObject(mojo, "session", session);
@@ -209,10 +207,10 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
     private String getCommandLineAsString(CommandLine commandline) {
         // for the sake of the test comparisons, cut out the eventual
         // cmd /c *.bat conversion
-        String result = commandline.getExecutable();
+        StringBuilder result = new StringBuilder(commandline.getExecutable());
         boolean isCmd = false;
-        if (OS.isFamilyWindows() && result.equals("cmd")) {
-            result = "";
+        if (OS.isFamilyWindows() && result.toString().equals("cmd")) {
+            result = new StringBuilder();
             isCmd = true;
         }
         String[] arguments = commandline.getArguments();
@@ -224,23 +222,24 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
             if (isCmd && i == 1 && arg.endsWith(".bat")) {
                 arg = arg.substring(0, arg.length() - ".bat".length());
             }
-            result += (result.length() == 0 ? "" : " ") + arg;
+            result.append((result.isEmpty()) ? "" : " ").append(arg);
         }
-        return result;
+        return result.toString();
     }
 
-    @Test
     public void testSplitComplexArgumentString() {
-        String option = "param1 " +
-                "param2   \n   " +
-                "param3\n" +
-                "param4=\"/path/to/my file.log\"   " +
-                "'var\"foo   var\"foo' " +
-                "'var\"foo'   " +
-                "'var\"foo' " +
-                "\"foo'var foo'var\" " +
-                "\"foo'var\" " +
-                "\"foo'var\"";
+        String option = """
+                param1 \
+                param2  \s
+                   \
+                param3
+                param4="/path/to/my file.log"   \
+                'var"foo   var"foo' \
+                'var"foo'   \
+                'var"foo' \
+                "foo'var foo'var" \
+                "foo'var" \
+                "foo'var\"""";
 
         String expected = "START," +
                 "param1," +
