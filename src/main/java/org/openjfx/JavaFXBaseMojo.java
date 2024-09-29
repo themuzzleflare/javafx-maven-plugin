@@ -317,7 +317,7 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
         pathElements.forEach((k, v) -> getLog().debug(" " + k + " :: " + (v != null && v.name() != null ? v.name() : v)));
     }
 
-    private JavaModuleDescriptor createModuleDescriptor(ResolvePathsResult<File> resolvePathsResult) throws MojoExecutionException {
+    private JavaModuleDescriptor createModuleDescriptor(ResolvePathsResult<File> resolvePathsResult) {
         if (runtimePathOption == CLASSPATH) {
             getLog().info(CLASSPATH + " runtimePathOption set by user. module-info.java will be ignored.");
             return null;
@@ -333,7 +333,7 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
         list.addAll(project.getDependencies().stream()
                 .filter(d -> d.getSystemPath() != null && ! d.getSystemPath().isEmpty())
                 .map(d -> new File(d.getSystemPath()))
-                .collect(Collectors.toList()));
+                .toList());
 
         list.addAll(project.getArtifacts().stream()
                 .sorted((a1, a2) -> {
@@ -345,7 +345,7 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
                     return compare;
                 })
                 .map(Artifact::getFile)
-                .collect(Collectors.toList()));
+                .toList());
         return list.stream()
                 .distinct()
                 .collect(Collectors.toList());
@@ -398,13 +398,13 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
         if (exec == null) {
             String javaHomeFromEnv = getJavaHomeEnv(enviro);
             if (javaHomeFromEnv != null && ! javaHomeFromEnv.isEmpty()) {
-                exec = findExecutable(executable, Arrays.asList(javaHomeFromEnv.concat(File.separator).concat("bin")));
+                exec = findExecutable(executable, List.of(javaHomeFromEnv.concat(File.separator).concat("bin")));
             }
         }
 
         if (exec == null && OS.isFamilyWindows()) {
             List<String> paths = this.getExecutablePaths(enviro);
-            paths.add(0, dir.getAbsolutePath());
+            paths.addFirst(dir.getAbsolutePath());
             exec = findExecutable(executable, paths);
         }
 
@@ -536,7 +536,7 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
     }
 
     private int executeCommandLine(Executor exec, final CommandLine commandLine, Map<String, String> enviro,
-                                   final PumpStreamHandler psh) throws ExecuteException, IOException {
+                                   final PumpStreamHandler psh) throws IOException {
         exec.setStreamHandler(psh);
 
         int result;
