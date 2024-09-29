@@ -371,7 +371,7 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
             for (Map.Entry<?, ?> entry : systemEnvVars.entrySet()) {
                 enviro.put((String) entry.getKey(), (String) entry.getValue());
             }
-        } catch (IOException x) {
+        } catch (UnsupportedOperationException | ClassCastException | NullPointerException | IllegalArgumentException x) {
             getLog().error("Could not assign default system environment variables.", x);
         }
 
@@ -422,19 +422,19 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
         } else {
             toRet = new CommandLine(exec);
         }
-        getLog().debug("Executable " + toRet.toString());
+        getLog().debug("Executable " + toRet);
         return toRet;
     }
 
     int executeCommandLine(Executor exec, CommandLine commandLine, Map<String, String> enviro,
-                           OutputStream out, OutputStream err) throws ExecuteException, IOException {
+                           OutputStream out, OutputStream err) throws IOException {
         // note: don't use BufferedOutputStream here since it delays the outputs MEXEC-138
         PumpStreamHandler psh = new PumpStreamHandler(out, err, System.in);
         return executeCommandLine(exec, commandLine, enviro, psh);
     }
 
     int executeCommandLine(Executor exec, CommandLine commandLine, Map<String, String> enviro,
-                           FileOutputStream outputFile) throws ExecuteException, IOException {
+                           FileOutputStream outputFile) throws IOException {
         BufferedOutputStream bos = new BufferedOutputStream(outputFile);
         PumpStreamHandler psh = new PumpStreamHandler(bos);
         return executeCommandLine(exec, commandLine, enviro, psh);
@@ -591,7 +591,7 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
             URLClassLoader classLoader = new URLClassLoader(urls, JavaFXBaseMojo.class.getClassLoader());
             Class<?> clazz = Class.forName(mainClass, false, classLoader);
             fxApplication = doesExtendFXApplication(clazz);
-            getLog().debug("Main Class " + clazz.toString() + " extends Application: " + fxApplication);
+            getLog().debug("Main Class " + clazz + " extends Application: " + fxApplication);
         } catch (NoClassDefFoundError | ClassNotFoundException | DependencyResolutionRequiredException | MalformedURLException e) {
             getLog().debug(e);
         }
