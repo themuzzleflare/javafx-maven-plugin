@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
  * This is required because these are not resolved when running the tests
  */
 class MavenArtifactResolver {
-    private static String DEFAULT_LOCAL_REPO = org.apache.maven.repository.RepositorySystem.
+    private static final String DEFAULT_LOCAL_REPO = org.apache.maven.repository.RepositorySystem.
             defaultUserLocalRepository.getAbsolutePath();
 
     private final RepositorySystem repositorySystem;
@@ -97,13 +97,13 @@ class MavenArtifactResolver {
 
         ArtifactResult resolvedArtifact;
         try {
-            List<ArtifactRequest> artifactRequests = Arrays.asList(
+            List<ArtifactRequest> artifactRequests = List.of(
                     new ArtifactRequest(new DefaultArtifact(artifact.getGroupId(), artifact.getArtifactId(),
                             artifact.getClassifier() != null ? artifact.getClassifier() : "",
                             artifact.getExtension(), artifact.getVersion()),
-                    remoteRepositories, JavaScopes.RUNTIME));
+                            remoteRepositories, JavaScopes.RUNTIME));
             List<ArtifactResult> results = repositorySystem.resolveArtifacts(systemSession, artifactRequests);
-            resolvedArtifact = results.get(results.size() - 1);
+            resolvedArtifact = results.getLast();
         } catch (ArtifactResolutionException e) {
             e.printStackTrace();
             return null;
