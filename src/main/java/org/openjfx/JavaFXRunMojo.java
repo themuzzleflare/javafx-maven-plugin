@@ -47,7 +47,6 @@ import static org.openjfx.model.RuntimePathOption.MODULEPATH;
 @Mojo(name = "run", requiresDependencyResolution = ResolutionScope.RUNTIME)
 @Execute(phase = LifecyclePhase.PROCESS_CLASSES)
 public class JavaFXRunMojo extends JavaFXBaseMojo {
-
     /**
      * <p>
      * The executable. Can be a full path or the name of the executable. In the latter case, the executable must be in

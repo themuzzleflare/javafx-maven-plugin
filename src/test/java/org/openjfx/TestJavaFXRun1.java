@@ -21,7 +21,6 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 
 public class TestJavaFXRun1 extends Application {
-
     @Override
     public void start(Stage stage) {
         System.out.println("JavaFXRun1");
@@ -31,5 +30,4 @@ public class TestJavaFXRun1 extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
 }

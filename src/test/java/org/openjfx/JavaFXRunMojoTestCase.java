@@ -56,7 +56,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
-
     private static final File LOCAL_REPO = new File( "src/test/repository" );
     private static final String SOME_EXECUTABLE = UUID.randomUUID().toString();
 
@@ -66,7 +65,6 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
     private MockJavaFXRunMojo mojo;
 
     private class MockJavaFXRunMojo extends JavaFXRunMojo {
-
         public List<CommandLine> commandLines = new ArrayList<>();
         public String failureMsg;
         public int executeResult;
@@ -88,7 +86,6 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
         CommandLine getExecutedCommandline(int index) {
             return commandLines.get(index);
         }
-
     }
 
     public void setUp() throws Exception {

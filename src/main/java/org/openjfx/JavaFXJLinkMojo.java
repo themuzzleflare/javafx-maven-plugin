@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
 @Mojo(name = "jlink", requiresDependencyResolution = ResolutionScope.RUNTIME)
 @Execute(phase = LifecyclePhase.PROCESS_CLASSES)
 public class JavaFXJLinkMojo extends JavaFXBaseMojo {
-
     private static final Pattern JLINK_VERSION_PATTERN = Pattern.compile("(1[3-9]|[2-9][0-9]|\\d{3,})");
 
     /**
@@ -72,10 +71,10 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
 
     /**
      * Compression level of the resources being used, equivalent to:
-     * <code>-c, --compress=level</code>. Valid values: <code>0, 1, 2</code>,
-     * default 0
+     * <code>-c, --compress=zip-[level]</code>. Valid values: <code>0, 1, 2, 3, 4, 5, 6, 7, 8, 9</code>,
+     * default 6
      */
-    @Parameter(property = "javafx.compress", defaultValue = "0")
+    @Parameter(property = "javafx.compress", defaultValue = "6")
     private Integer compress;
 
     /**
@@ -166,7 +165,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
         }
 
         handleWorkingDirectory();
-        
+
         Map<String, String> enviro = handleSystemEnvVariables();
         CommandLine commandLine = getExecutablePath(jlinkExecutable, enviro, workingDirectory);
 
@@ -336,10 +335,10 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
         }
         if (compress != null) {
             commandArguments.add(" --compress");
-            if (compress < 0 || compress > 2) {
-                throw new MojoFailureException("The given compress parameters " + compress + " is not in the valid value range from 0..2");
+            if (compress < 0 || compress > 9) {
+                throw new MojoFailureException("The given compress parameters " + compress + " is not in the valid value range from 0..9");
             }
-            commandArguments.add(" " + compress);
+            commandArguments.add(" " + "zip-" + compress);
         }
         if (noHeaderFiles) {
             commandArguments.add(" --no-header-files");

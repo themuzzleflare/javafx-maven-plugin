@@ -54,7 +54,6 @@ import java.util.stream.Collectors;
  * This is required because these are not resolved when running the tests
  */
 class MavenArtifactResolver {
-
     private static String DEFAULT_LOCAL_REPO = org.apache.maven.repository.RepositorySystem.
             defaultUserLocalRepository.getAbsolutePath();
 
@@ -137,5 +136,4 @@ class MavenArtifactResolver {
                 })
                 .collect(Collectors.toSet());
     }
-
 }

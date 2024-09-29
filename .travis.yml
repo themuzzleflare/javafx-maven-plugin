@@ -1,6 +1,6 @@
 # use java support
 language: java
-jdk: openjdk11
+jdk: openjdk23
 
 # run in container
 sudo: false

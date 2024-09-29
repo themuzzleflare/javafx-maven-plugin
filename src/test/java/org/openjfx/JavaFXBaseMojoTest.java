@@ -18,10 +18,9 @@ import static org.openjfx.model.RuntimePathOption.CLASSPATH;
 import static org.openjfx.model.RuntimePathOption.MODULEPATH;
 
 public class JavaFXBaseMojoTest {
-
     private static Path path;
     private static String tempDirPath;
-    
+
     private JavaFXBaseMojo mojo;
     private JavaModuleDescriptor moduleDescriptor;
 
@@ -30,7 +29,7 @@ public class JavaFXBaseMojoTest {
         tempDirPath = System.getProperty("java.io.tmpdir");
         path = Files.createDirectories(Paths.get(tempDirPath, "test", "test"));
     }
-    
+
     @Before
     public void create() {
         mojo = new JavaFXBaseMojo() {
@@ -41,7 +40,7 @@ public class JavaFXBaseMojoTest {
         };
         moduleDescriptor = JavaModuleDescriptor.newModule("hellofx").build();
     }
-    
+
     @Test
     public void parentTest() {
         Assert.assertEquals(Paths.get(tempDirPath), JavaFXBaseMojo.getParent(path, 2));

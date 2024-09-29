@@ -71,7 +71,6 @@ import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.openjfx.model.RuntimePathOption;
 
 abstract class JavaFXBaseMojo extends AbstractMojo {
-
     private static final String JAVAFX_APPLICATION_CLASS_NAME = "javafx.application.Application";
     static final String JAVAFX_PREFIX = "javafx";
 
@@ -96,10 +95,10 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
     @Parameter(property = "javafx.skip", defaultValue = "false")
     boolean skip;
 
-    @Parameter(readonly = true, required = true, defaultValue = "${basedir}")
+    @Parameter(required = true, defaultValue = "${basedir}")
     File basedir;
 
-    @Parameter(readonly = true, required = true, defaultValue = "${project.build.directory}")
+    @Parameter(required = true, defaultValue = "${project.build.directory}")
     File builddir;
 
     /**
@@ -114,7 +113,7 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
     @Parameter(property = "javafx.workingDirectory")
     File workingDirectory;
 
-    @Parameter(defaultValue = "${project.compileClasspathElements}", readonly = true, required = true)
+    @Parameter(defaultValue = "${project.compileClasspathElements}", required = true)
     private List<String> compilePath;
 
     @Parameter(property = "javafx.outputFile")
@@ -161,7 +160,7 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
     */
     @Component
     private ToolchainManager toolchainManager;
-   
+
     List<String> classpathElements;
     List<String> modulepathElements;
     Map<String, JavaModuleDescriptor> pathElements;
