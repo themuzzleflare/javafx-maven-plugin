@@ -32,7 +32,6 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
-import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -187,7 +186,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
             commandLine.addArguments(args, false);
             getLog().debug("Executing command line: " + commandLine);
 
-            Executor exec = new DefaultExecutor();
+            Executor exec = new DefaultExecutor.Builder<>().get();
             exec.setWorkingDirectory(workingDirectory);
 
             try {
@@ -197,19 +196,15 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
                         getLog().warn( "Could not create non existing parent directories for log file: " + outputFile );
                     }
 
-                    FileOutputStream outputStream = null;
-                    try {
-                        outputStream = new FileOutputStream(outputFile);
+                    try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
                         resultCode = executeCommandLine(exec, commandLine, enviro, outputStream);
-                    } finally {
-                        IOUtil.close(outputStream);
                     }
                 } else {
                     resultCode = executeCommandLine(exec, commandLine, enviro, System.out, System.err);
                 }
 
                 if (resultCode != 0) {
-                    String message = "Result of " + commandLine.toString() + " execution is: '" + resultCode + "'.";
+                    String message = "Result of " + commandLine + " execution is: '" + resultCode + "'.";
                     getLog().error(message);
                     throw new MojoExecutionException(message);
                 }
@@ -385,7 +380,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
         int resultCode = -1;
 
         try {
-            resultCode = executeCommandLine(new DefaultExecutor(), versionCommandLine, null, baos, System.err);
+            resultCode = executeCommandLine(new DefaultExecutor.Builder<>().get(), versionCommandLine, null, baos, System.err);
         } catch (IOException e) {
             if (getLog().isDebugEnabled()) {
                 getLog().error("Error getting JLink version", e);
