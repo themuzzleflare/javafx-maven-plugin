@@ -1,11 +1,7 @@
 package org.openjfx;
 
 import org.codehaus.plexus.languages.java.jpms.JavaModuleDescriptor;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +24,15 @@ public class JavaFXBaseMojoTest {
     public static void setup() throws IOException {
         tempDirPath = System.getProperty("java.io.tmpdir");
         path = Files.createDirectories(Paths.get(tempDirPath, "test", "test"));
+    }
+
+    @AfterClass
+    public static void destroy() throws IOException {
+        Files.walk(path.getParent())
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .filter(f -> "test".equals(f.getName()))
+                .forEach(File::delete);
     }
 
     @Before
@@ -94,14 +99,5 @@ public class JavaFXBaseMojoTest {
     @Test
     public void invalidPathWithDepthTest() {
         Assert.assertNull(JavaFXBaseMojo.getParent(Paths.get("/some-invalid-path"), 2));
-    }
-
-    @AfterClass
-    public static void destroy() throws IOException {
-        Files.walk(path.getParent())
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .filter(f -> "test".equals(f.getName()))
-                .forEach(File::delete);
     }
 }

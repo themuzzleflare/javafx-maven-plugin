@@ -39,37 +39,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
-    private static final File LOCAL_REPO = new File( "src/test/repository" );
+    private static final File LOCAL_REPO = new File("src/test/repository");
     private static final String SOME_EXECUTABLE = UUID.randomUUID().toString();
 
     @Mock
     private MavenSession session;
 
     private MockJavaFXRunMojo mojo;
-
-    private static class MockJavaFXRunMojo extends JavaFXRunMojo {
-        public List<CommandLine> commandLines = new ArrayList<>();
-        public String failureMsg;
-        public int executeResult;
-
-        @Override
-        protected int executeCommandLine(Executor exec, CommandLine commandLine, Map enviro, OutputStream out,
-                                         OutputStream err) throws IOException {
-            commandLines.add(commandLine);
-            if (failureMsg != null) {
-                throw new ExecuteException(failureMsg, executeResult);
-            }
-            return executeResult;
-        }
-
-        int getAmountExecutedCommandLines() {
-            return commandLines.size();
-        }
-
-        CommandLine getExecutedCommandline(int index) {
-            return commandLines.get(index);
-        }
-    }
 
     public void setUp() throws Exception {
         super.setUp();
@@ -124,10 +100,10 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
         assertNotNull(mojo);
 
         setUpProject(testPom, mojo);
-        MavenProject project = (MavenProject) getVariableValueFromObject( mojo, "project" );
+        MavenProject project = (MavenProject) getVariableValueFromObject(mojo, "project");
         assertNotNull(project);
 
-        if (! project.getDependencies().isEmpty()) {
+        if (!project.getDependencies().isEmpty()) {
             final MavenArtifactResolver resolver = new MavenArtifactResolver(project.getRepositories());
             Set<Artifact> artifacts = project.getDependencies().stream()
                     .map(d -> new DefaultArtifact(d.getGroupId(), d.getArtifactId(), d.getClassifier(), d.getType(), d.getVersion()))
@@ -176,7 +152,7 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
         ProjectBuildingResult build = builder.build(pomFile, buildingRequest);
         MavenProject project = build.getProject();
 
-        project.getBuild().setOutputDirectory(new File( "target/test-classes").getAbsolutePath());
+        project.getBuild().setOutputDirectory(new File("target/test-classes").getAbsolutePath());
         setVariableValueToObject(mojo, "project", project);
     }
 
@@ -240,5 +216,29 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
                 .stream().reduce("START", (s1, s2) -> s1 + "," + s2);
 
         Assert.assertEquals(expected, splitedOption);
+    }
+
+    private static class MockJavaFXRunMojo extends JavaFXRunMojo {
+        public List<CommandLine> commandLines = new ArrayList<>();
+        public String failureMsg;
+        public int executeResult;
+
+        @Override
+        protected int executeCommandLine(Executor exec, CommandLine commandLine, Map enviro, OutputStream out,
+                                         OutputStream err) throws IOException {
+            commandLines.add(commandLine);
+            if (failureMsg != null) {
+                throw new ExecuteException(failureMsg, executeResult);
+            }
+            return executeResult;
+        }
+
+        int getAmountExecutedCommandLines() {
+            return commandLines.size();
+        }
+
+        CommandLine getExecutedCommandline(int index) {
+            return commandLines.get(index);
+        }
     }
 }

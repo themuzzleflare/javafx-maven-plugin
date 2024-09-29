@@ -5,11 +5,7 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.Executor;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.Execute;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.plugins.annotations.*;
 import org.codehaus.plexus.languages.java.jpms.JavaModuleDescriptor;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -17,11 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -42,7 +34,7 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
 
     public void execute() throws MojoExecutionException {
         if (skip) {
-            getLog().info( "skipping execute as per configuration" );
+            getLog().info("skipping execute as per configuration");
             return;
         }
 
@@ -51,7 +43,7 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
         }
 
         if (basedir == null) {
-            throw new IllegalStateException( "basedir is null. Should not be possible." );
+            throw new IllegalStateException("basedir is null. Should not be possible.");
         }
 
         try {
@@ -73,8 +65,8 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
             try {
                 int resultCode;
                 if (outputFile != null) {
-                    if ( !outputFile.getParentFile().exists() && !outputFile.getParentFile().mkdirs()) {
-                        getLog().warn( "Could not create non existing parent directories for log file: " + outputFile );
+                    if (!outputFile.getParentFile().exists() && !outputFile.getParentFile().mkdirs()) {
+                        getLog().warn("Could not create non existing parent directories for log file: " + outputFile);
                     }
 
                     try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
@@ -170,7 +162,7 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
             char item = strArr[i];
 
             if (item == expectedSeparator
-                    || (expectedSeparator == ' ' && Pattern.matches("\\s", String.valueOf(item))) ) {
+                    || (expectedSeparator == ' ' && Pattern.matches("\\s", String.valueOf(item)))) {
 
                 if (expectedSeparator == '"' || expectedSeparator == '\'') {
                     sb.append(item);

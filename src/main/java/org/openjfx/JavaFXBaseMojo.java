@@ -1,39 +1,6 @@
 package org.openjfx;
 
-import static org.openjfx.model.RuntimePathOption.CLASSPATH;
-import static org.openjfx.model.RuntimePathOption.MODULEPATH;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.ExecuteResultHandler;
-import org.apache.commons.exec.Executor;
-import org.apache.commons.exec.OS;
-import org.apache.commons.exec.ProcessDestroyer;
-import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.exec.ShutdownHookProcessDestroyer;
+import org.apache.commons.exec.*;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.execution.MavenSession;
@@ -45,70 +12,82 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.toolchain.Toolchain;
 import org.apache.maven.toolchain.ToolchainManager;
-import org.codehaus.plexus.languages.java.jpms.JavaModuleDescriptor;
-import org.codehaus.plexus.languages.java.jpms.LocationManager;
-import org.codehaus.plexus.languages.java.jpms.ModuleNameSource;
-import org.codehaus.plexus.languages.java.jpms.ResolvePathsRequest;
-import org.codehaus.plexus.languages.java.jpms.ResolvePathsResult;
+import org.codehaus.plexus.languages.java.jpms.*;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.openjfx.model.RuntimePathOption;
 
-abstract class JavaFXBaseMojo extends AbstractMojo {
-    private static final String JAVAFX_APPLICATION_CLASS_NAME = "javafx.application.Application";
-    static final String JAVAFX_PREFIX = "javafx";
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static org.openjfx.model.RuntimePathOption.CLASSPATH;
+import static org.openjfx.model.RuntimePathOption.MODULEPATH;
+
+abstract class JavaFXBaseMojo extends AbstractMojo {
+    static final String JAVAFX_PREFIX = "javafx";
+    private static final String JAVAFX_APPLICATION_CLASS_NAME = "javafx.application.Application";
     @Parameter(defaultValue = "${project}", readonly = true)
     MavenProject project;
-
-    @Parameter(defaultValue = "${session}", readonly = true)
-    private MavenSession session;
-
-    @Component
-    private BuildPluginManager pluginManager;
-
-    @Component
-    private LocationManager locationManager;
-
     @Parameter(property = "javafx.mainClass", required = true)
     String mainClass;
-
     /**
      * Skip the execution.
      */
     @Parameter(property = "javafx.skip", defaultValue = "false")
     boolean skip;
-
     @Parameter(required = true, defaultValue = "${basedir}")
     File basedir;
-
     @Parameter(required = true, defaultValue = "${project.build.directory}")
     File builddir;
-
     /**
      * Type of {@link RuntimePathOption} to run the application.
      */
     @Parameter(property = "javafx.runtimePathOption")
     RuntimePathOption runtimePathOption;
-
     /**
      * The current working directory. Optional. If not specified, basedir will be used.
      */
     @Parameter(property = "javafx.workingDirectory")
     File workingDirectory;
-
-    @Parameter(defaultValue = "${project.compileClasspathElements}", required = true)
-    private List<String> compilePath;
-
     @Parameter(property = "javafx.outputFile")
     File outputFile;
-
+    /**
+     * <p>
+     * A list of vm options passed to the {@code executable}.
+     * </p>
+     */
+    @Parameter
+    List<?> options;
+    /**
+     * Arguments separated by space for the executed program. For example: "-j 20"
+     */
+    @Parameter(property = "javafx.args")
+    String commandlineArgs;
+    List<String> classpathElements;
+    List<String> modulepathElements;
+    Map<String, JavaModuleDescriptor> pathElements;
+    JavaModuleDescriptor moduleDescriptor;
+    @Parameter(defaultValue = "${session}", readonly = true)
+    private MavenSession session;
+    @Component
+    private BuildPluginManager pluginManager;
+    @Component
+    private LocationManager locationManager;
+    @Parameter(defaultValue = "${project.compileClasspathElements}", required = true)
+    private List<String> compilePath;
     /**
      * If set to true the child process executes asynchronously and build execution continues in parallel.
      */
     @Parameter(property = "javafx.async", defaultValue = "false")
     private boolean async;
-
     /**
      * If set to true, the asynchronous child process is destroyed upon JVM shutdown. If set to false, asynchronous
      * child process continues execution after JVM shutdown. Applies only to asynchronous processes; ignored for
@@ -116,39 +95,17 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
      */
     @Parameter(property = "javafx.asyncDestroyOnShutdown", defaultValue = "true")
     private boolean asyncDestroyOnShutdown;
-
-    /**
-     * <p>
-     * A list of vm options passed to the {@code executable}.
-     * </p>
-     *
-     */
-    @Parameter
-    List<?> options;
-
-    /**
-     * Arguments separated by space for the executed program. For example: "-j 20"
-     */
-    @Parameter(property = "javafx.args")
-    String commandlineArgs;
-
     /**
      * If set to true, it will include the dependencies that
      * generate path exceptions in the classpath. Default is false.
      */
     @Parameter(property = "javafx.includePathExceptionsInClasspath", defaultValue = "false")
     private boolean includePathExceptionsInClasspath;
-
     /**
-    *
-    */
+     *
+     */
     @Component
     private ToolchainManager toolchainManager;
-
-    List<String> classpathElements;
-    List<String> modulepathElements;
-    Map<String, JavaModuleDescriptor> pathElements;
-    JavaModuleDescriptor moduleDescriptor;
     private ProcessDestroyer processDestroyer;
 
     static boolean isMavenUsingJava8() {
@@ -158,6 +115,75 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
     static boolean isTargetUsingJava8(CommandLine commandLine) {
         final String java = commandLine.getExecutable();
         return java != null && Files.exists(Paths.get(java).resolve("../../jre/lib/rt.jar").normalize());
+    }
+
+    /**
+     * Returns the path of the parent directory.
+     * At the given depth if the path has no parent, the method returns null.
+     *
+     * @param path  Path against which the parent needs to be evaluated
+     * @param depth Depth of the path relative to parent
+     * @return Path to the parent, if exists. Null, otherwise.
+     */
+    static Path getParent(Path path, int depth) {
+        if (path == null || !Files.exists(path) || depth > path.getNameCount()) {
+            return null;
+        }
+        return path.getRoot().resolve(path.subpath(0, path.getNameCount() - depth));
+    }
+
+    private static String findExecutable(final String executable, final List<String> paths) {
+        File f = null;
+        search:
+        for (final String path : paths) {
+            f = new File(path, executable);
+            if (!OS.isFamilyWindows() && f.isFile()) {
+                break;
+            } else {
+                for (final String extension : getExecutableExtensions()) {
+                    f = new File(path, executable + extension);
+                    if (f.isFile()) {
+                        break search;
+                    }
+                }
+            }
+        }
+
+        if (f == null || !f.exists()) {
+            return null;
+        }
+        return f.getAbsolutePath();
+    }
+
+    private static boolean hasNativeExtension(final String exec) {
+        final String lowerCase = exec.toLowerCase();
+        return lowerCase.endsWith(".exe") || lowerCase.endsWith(".com");
+    }
+
+    private static boolean hasExecutableExtension(final String exec) {
+        final String lowerCase = exec.toLowerCase();
+        for (final String ext : getExecutableExtensions()) {
+            if (lowerCase.endsWith(ext)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static List<String> getExecutableExtensions() {
+        final String pathExt = System.getenv("PATHEXT");
+        return pathExt == null ? Arrays.asList(".bat", ".cmd")
+                : Arrays.asList(StringUtils.split(pathExt.toLowerCase(), File.pathSeparator));
+    }
+
+    private static boolean doesExtendFXApplication(Class<?> mainClass) {
+        for (Class<?> sc = mainClass.getSuperclass(); sc != null;
+             sc = sc.getSuperclass()) {
+            if (sc.getName().equals(JAVAFX_APPLICATION_CLASS_NAME)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void preparePaths(Path jdkHome) throws MojoExecutionException {
@@ -315,7 +341,7 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
 
         // include systemPath dependencies
         list.addAll(project.getDependencies().stream()
-                .filter(d -> d.getSystemPath() != null && ! d.getSystemPath().isEmpty())
+                .filter(d -> d.getSystemPath() != null && !d.getSystemPath().isEmpty())
                 .map(d -> new File(d.getSystemPath()))
                 .toList());
 
@@ -355,7 +381,8 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
             for (Map.Entry<?, ?> entry : systemEnvVars.entrySet()) {
                 enviro.put((String) entry.getKey(), (String) entry.getValue());
             }
-        } catch (UnsupportedOperationException | ClassCastException | NullPointerException | IllegalArgumentException x) {
+        } catch (UnsupportedOperationException | ClassCastException | NullPointerException |
+                 IllegalArgumentException x) {
             getLog().error("Could not assign default system environment variables.", x);
         }
 
@@ -371,7 +398,7 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
         }
 
         if (exec == null && toolchainManager != null) {
-        	Toolchain toolchain = toolchainManager.getToolchainFromBuildContext("jdk", session);
+            Toolchain toolchain = toolchainManager.getToolchainFromBuildContext("jdk", session);
             if (toolchain != null) {
                 getLog().info("Toolchain in javafx-maven-plugin " + toolchain);
                 exec = toolchain.findTool("java");
@@ -381,7 +408,7 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
 
         if (exec == null) {
             String javaHomeFromEnv = getJavaHomeEnv(enviro);
-            if (javaHomeFromEnv != null && ! javaHomeFromEnv.isEmpty()) {
+            if (javaHomeFromEnv != null && !javaHomeFromEnv.isEmpty()) {
                 exec = findExecutable(executable, List.of(javaHomeFromEnv.concat(File.separator).concat("bin")));
             }
         }
@@ -397,12 +424,12 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
         }
 
         CommandLine toRet;
-        if (OS.isFamilyWindows() && !hasNativeExtension(exec) && hasExecutableExtension(exec) ) {
+        if (OS.isFamilyWindows() && !hasNativeExtension(exec) && hasExecutableExtension(exec)) {
             // run the windows batch script in isolation and exit at the end
-            final String comSpec = System.getenv( "ComSpec" );
-            toRet = new CommandLine( comSpec == null ? "cmd" : comSpec );
-            toRet.addArgument( "/c" );
-            toRet.addArgument( exec );
+            final String comSpec = System.getenv("ComSpec");
+            toRet = new CommandLine(comSpec == null ? "cmd" : comSpec);
+            toRet.addArgument("/c");
+            toRet.addArgument(exec);
         } else {
             toRet = new CommandLine(exec);
         }
@@ -424,20 +451,6 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
         return executeCommandLine(exec, commandLine, enviro, psh);
     }
 
-    /**
-     * Returns the path of the parent directory.
-     * At the given depth if the path has no parent, the method returns null.
-     * @param path Path against which the parent needs to be evaluated
-     * @param depth Depth of the path relative to parent
-     * @return Path to the parent, if exists. Null, otherwise.
-     */
-    static Path getParent(Path path, int depth) {
-        if (path == null || !Files.exists(path) || depth > path.getNameCount()) {
-            return null;
-        }
-        return path.getRoot().resolve(path.subpath(0, path.getNameCount() - depth));
-    }
-
     String createMainClassString(String mainClass, JavaModuleDescriptor moduleDescriptor, RuntimePathOption runtimePathOption) {
         Objects.requireNonNull(mainClass, "Main class cannot be null");
         if (runtimePathOption == CLASSPATH) {
@@ -451,49 +464,6 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
             return moduleDescriptor.name() + "/" + mainClass;
         }
         return mainClass;
-    }
-
-    private static String findExecutable(final String executable, final List<String> paths) {
-        File f = null;
-        search: for (final String path : paths) {
-            f = new File(path, executable);
-            if (!OS.isFamilyWindows() && f.isFile()) {
-                break;
-            } else {
-                for (final String extension : getExecutableExtensions()) {
-                    f = new File(path, executable + extension);
-                    if (f.isFile()) {
-                        break search;
-                    }
-                }
-            }
-        }
-
-        if (f == null || !f.exists()) {
-            return null;
-        }
-        return f.getAbsolutePath();
-    }
-
-    private static boolean hasNativeExtension(final String exec) {
-        final String lowerCase = exec.toLowerCase();
-        return lowerCase.endsWith(".exe") || lowerCase.endsWith(".com");
-    }
-
-    private static boolean hasExecutableExtension(final String exec) {
-        final String lowerCase = exec.toLowerCase();
-        for (final String ext : getExecutableExtensions()) {
-            if (lowerCase.endsWith(ext)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static List<String> getExecutableExtensions() {
-        final String pathExt = System.getenv("PATHEXT");
-        return pathExt == null ? Arrays.asList(".bat", ".cmd")
-                : Arrays.asList(StringUtils.split(pathExt.toLowerCase(), File.pathSeparator));
     }
 
     private List<String> getExecutablePaths(Map<String, String> enviro) {
@@ -576,19 +546,10 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
             Class<?> clazz = Class.forName(mainClass, false, classLoader);
             fxApplication = doesExtendFXApplication(clazz);
             getLog().debug("Main Class " + clazz + " extends Application: " + fxApplication);
-        } catch (NoClassDefFoundError | ClassNotFoundException | DependencyResolutionRequiredException | MalformedURLException e) {
+        } catch (NoClassDefFoundError | ClassNotFoundException | DependencyResolutionRequiredException |
+                 MalformedURLException e) {
             getLog().debug(e);
         }
         return fxApplication;
-    }
-
-    private static boolean doesExtendFXApplication(Class<?> mainClass) {
-        for (Class<?> sc = mainClass.getSuperclass(); sc != null;
-             sc = sc.getSuperclass()) {
-            if (sc.getName().equals(JAVAFX_APPLICATION_CLASS_NAME)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

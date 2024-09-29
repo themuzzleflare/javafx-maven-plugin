@@ -1,16 +1,9 @@
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.Executor;
-import org.apache.commons.exec.OS;
+package org.openjfx;
+
+import org.apache.commons.exec.*;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.Execute;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.plugins.annotations.*;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
@@ -23,11 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -133,7 +122,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
 
     public void execute() throws MojoExecutionException {
         if (skip) {
-            getLog().info( "skipping execute as per configuration" );
+            getLog().info("skipping execute as per configuration");
             return;
         }
 
@@ -142,7 +131,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
         }
 
         if (basedir == null) {
-            throw new IllegalStateException( "basedir is null. Should not be possible." );
+            throw new IllegalStateException("basedir is null. Should not be possible.");
         }
 
         handleWorkingDirectory();
@@ -174,8 +163,8 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
             try {
                 int resultCode;
                 if (outputFile != null) {
-                    if ( !outputFile.getParentFile().exists() && !outputFile.getParentFile().mkdirs()) {
-                        getLog().warn( "Could not create non existing parent directories for log file: " + outputFile );
+                    if (!outputFile.getParentFile().exists() && !outputFile.getParentFile().mkdirs()) {
+                        getLog().warn("Could not create non existing parent directories for log file: " + outputFile);
                     }
 
                     try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
@@ -191,7 +180,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
                     throw new MojoExecutionException(message);
                 }
 
-                if (launcher != null && ! launcher.isEmpty()) {
+                if (launcher != null && !launcher.isEmpty()) {
                     patchLauncherScript(launcher);
 
                     if (OS.isFamilyWindows()) {
@@ -199,7 +188,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
                     }
                 }
 
-                if (jlinkZipName != null && ! jlinkZipName.isEmpty()) {
+                if (jlinkZipName != null && !jlinkZipName.isEmpty()) {
                     getLog().debug("Creating zip of runtime image");
                     File createZipArchiveFromImage = createZipArchiveFromImage();
                     project.getArtifact().setFile(createZipArchiveFromImage);
@@ -269,7 +258,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
         if (modulepathElements != null && !modulepathElements.isEmpty()) {
             commandArguments.add(" --module-path");
             String modulePath = StringUtils.join(modulepathElements.iterator(), File.pathSeparator);
-            if (jmodsPath != null && ! jmodsPath.isEmpty()) {
+            if (jmodsPath != null && !jmodsPath.isEmpty()) {
                 getLog().debug("Including jmods from local path: " + jmodsPath);
                 modulePath = jmodsPath + File.pathSeparator + modulePath;
             }
@@ -327,7 +316,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
             commandArguments.add(" --verbose");
         }
 
-        if (launcher != null && ! launcher.isEmpty()) {
+        if (launcher != null && !launcher.isEmpty()) {
             commandArguments.add(" --launcher");
             String moduleMainClass;
             if (mainClass.contains("/")) {
@@ -378,6 +367,4 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
         String versionStr = baos.toString();
         return JLINK_VERSION_PATTERN.matcher(versionStr).lookingAt();
     }
-
-    // for tests
 }
