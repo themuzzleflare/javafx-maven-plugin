@@ -79,7 +79,7 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
             boolean usingOldJDK = isTargetUsingJava8(commandLine);
 
             List<String> commandArguments = createCommandArguments(usingOldJDK);
-            String[] args = commandArguments.toArray(new String[commandArguments.size()]);
+            String[] args = commandArguments.toArray(new String[0]);
             commandLine.addArguments(args, false);
             getLog().debug("Executing command line: " + commandLine);
 
@@ -105,7 +105,7 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
                 }
 
                 if (resultCode != 0) {
-                    String message = "Result of " + commandLine.toString() + " execution is: '" + resultCode + "'.";
+                    String message = "Result of " + commandLine + " execution is: '" + resultCode + "'.";
                     getLog().error(message);
                     throw new MojoExecutionException(message);
                 }
@@ -162,8 +162,7 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
         }
 
         if (commandlineArgs != null) {
-            splitComplexArgumentString(commandlineArgs)
-                    .forEach(commandArguments::add);
+            commandArguments.addAll(splitComplexArgumentString(commandlineArgs));
         }
         return commandArguments;
     }
@@ -196,7 +195,7 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
                 if (expectedSeparator == '"' || expectedSeparator == '\'') {
                     sb.append(item);
                     expectedSeparator = ' ';
-                } else if (expectedSeparator == ' ' && sb.length() > 0) {
+                } else if (!sb.isEmpty()) {
                     splitedArgs.add(sb.toString());
                     sb.delete(0, sb.length());
                 }
@@ -208,7 +207,7 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
                 sb.append(item);
             }
 
-            if (i == strArr.length - 1 && sb.length() > 0) {
+            if (i == strArr.length - 1 && !sb.isEmpty()) {
                 splitedArgs.add(sb.toString());
             }
         }
