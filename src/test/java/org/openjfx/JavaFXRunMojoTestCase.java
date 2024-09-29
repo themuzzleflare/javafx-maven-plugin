@@ -41,7 +41,6 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.internal.impl.SimpleLocalRepositoryManagerFactory;
 import org.eclipse.aether.repository.LocalRepository;
 import org.junit.Assert;
-import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -71,7 +70,7 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
 
         @Override
         protected int executeCommandLine(Executor exec, CommandLine commandLine, Map enviro, OutputStream out,
-                                         OutputStream err) throws IOException, ExecuteException {
+                                         OutputStream err) throws IOException {
             commandLines.add(commandLine);
             if (failureMsg != null) {
                 throw new ExecuteException(failureMsg, executeResult);
@@ -179,7 +178,7 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
     private void setUpProject(File pomFile, AbstractMojo mojo) throws Exception {
         super.setUp();
 
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
 
         ProjectBuildingRequest buildingRequest = mock(ProjectBuildingRequest.class);
         buildingRequest.setResolveDependencies(true);

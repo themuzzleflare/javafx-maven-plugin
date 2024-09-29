@@ -26,7 +26,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.codehaus.plexus.languages.java.jpms.JavaModuleDescriptor;
-import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
@@ -83,7 +82,7 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
             commandLine.addArguments(args, false);
             getLog().debug("Executing command line: " + commandLine);
 
-            Executor exec = new DefaultExecutor();
+            Executor exec = new DefaultExecutor.Builder<>().get();
             exec.setWorkingDirectory(workingDirectory);
 
             try {
@@ -93,12 +92,8 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
                         getLog().warn( "Could not create non existing parent directories for log file: " + outputFile );
                     }
 
-                    FileOutputStream outputStream = null;
-                    try {
-                        outputStream = new FileOutputStream(outputFile);
+                    try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
                         resultCode = executeCommandLine(exec, commandLine, enviro, outputStream);
-                    } finally {
-                        IOUtil.close(outputStream);
                     }
                 } else {
                     resultCode = executeCommandLine(exec, commandLine, enviro, System.out, System.err);
