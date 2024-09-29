@@ -183,7 +183,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
         try {
 
             List<String> commandArguments = createCommandArguments();
-            String[] args = commandArguments.toArray(new String[commandArguments.size()]);
+            String[] args = commandArguments.toArray(new String[0]);
             commandLine.addArguments(args, false);
             getLog().debug("Executing command line: " + commandLine);
 
@@ -398,7 +398,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
             return false;
         }
 
-        String versionStr = new String(baos.toByteArray());
+        String versionStr = baos.toString();
         return JLINK_VERSION_PATTERN.matcher(versionStr).lookingAt();
     }
 
