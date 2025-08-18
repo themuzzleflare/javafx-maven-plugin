@@ -6,19 +6,19 @@
     <packaging>maven-plugin</packaging>
     <version>1.0.0</version>
     <name>javafx-maven-plugin Maven Mojo</name>
-    <description>The JavaFX Plugin is used to run JavaFX 23+ projects</description>
+    <description>The JavaFX Plugin is used to run JavaFX 24+ projects</description>
     <inceptionYear>2019</inceptionYear>
 
     <url>https://openjfx.io</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>23</maven.compiler.source>
-        <maven.compiler.target>23</maven.compiler.target>
-        <javafx.version>23</javafx.version>
-        <javadoc.plugin.version>3.10.0</javadoc.plugin.version>
+        <maven.compiler.source>24</maven.compiler.source>
+        <maven.compiler.target>24</maven.compiler.target>
+        <javafx.version>24.0.2</javafx.version>
+        <javadoc.plugin.version>3.11.2</javadoc.plugin.version>
         <gpg.plugin.version>3.2.7</gpg.plugin.version>
-        <java.version>23</java.version>
+        <java.version>24</java.version>
     </properties>
 
     <dependencies>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
-            <version>3.9.9</version>
+            <version>3.9.11</version>
             <scope>provided</scope>
         </dependency>
 
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
             <artifactId>maven-plugin-annotations</artifactId>
-            <version>3.15.0</version>
+            <version>3.15.1</version>
             <scope>provided</scope>
         </dependency>
 
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-java</artifactId>
-            <version>1.3.0</version>
+            <version>1.5.0</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.codehaus.plexus/plexus-archiver -->
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-exec</artifactId>
-            <version>1.4.0</version>
+            <version>1.5.0</version>
         </dependency>
 
         <!--test-->
@@ -80,7 +80,7 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
-            <version>3.9.9</version>
+            <version>3.9.11</version>
             <scope>provided</scope>
         </dependency>
 
@@ -88,7 +88,7 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-compat</artifactId>
-            <version>3.9.9</version>
+            <version>3.9.11</version>
             <scope>test</scope>
         </dependency>
 
@@ -128,7 +128,7 @@
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-interpolation</artifactId>
-            <version>1.27</version>
+            <version>1.28</version>
             <scope>test</scope>
         </dependency>
 
@@ -136,7 +136,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.14.0</version>
+            <version>5.18.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -155,7 +155,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>3.14.0</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -167,7 +167,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.15.0</version>
+                <version>3.15.1</version>
             </plugin>
 
             <!-- https://mvnrepository.com/artifact/org.sonatype.plugins/nexus-staging-maven-plugin -->
