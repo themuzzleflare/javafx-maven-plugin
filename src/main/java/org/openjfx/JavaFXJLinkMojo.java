@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2025 Paul Tavitian.
+ */
+
 package org.openjfx;
 
 import org.apache.commons.exec.*;
@@ -6,6 +10,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
+import org.codehaus.plexus.archiver.FileSet;
+import org.codehaus.plexus.archiver.util.DefaultFileSet;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -20,6 +26,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 @Mojo(name = "jlink", requiresDependencyResolution = ResolutionScope.RUNTIME)
 @Execute(phase = LifecyclePhase.PROCESS_CLASSES)
 public class JavaFXJLinkMojo extends JavaFXBaseMojo {
@@ -117,6 +124,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
     /**
      * The JAR archiver needed for archiving the environments.
      */
+    @SuppressWarnings("deprecation")
     @Component(role = Archiver.class, hint = "zip")
     private ZipArchiver zipArchiver;
 
@@ -196,6 +204,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
 
             } catch (ExecuteException e) {
                 getLog().error("Command execution failed.", e);
+                //noinspection CallToPrintStackTrace
                 e.printStackTrace();
                 throw new MojoExecutionException("Command execution failed.", e);
             } catch (IOException e) {
@@ -223,7 +232,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
                     .collect(Collectors.joining(" "));
 
             // Add vm options to launcher script
-            List<String> lines = Files.lines(launcherPath)
+            @SuppressWarnings("resource") List<String> lines = Files.lines(launcherPath)
                     .map(line -> {
                         boolean unixOptionsLine = "JLINK_VM_OPTIONS=".equals(line);
                         boolean winOptionsLine = "set JLINK_VM_OPTIONS=".equals(line);
@@ -240,7 +249,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
 
         if (commandlineArgs != null) {
             // Add options to launcher script
-            List<String> lines = Files.lines(launcherPath)
+            @SuppressWarnings("resource") List<String> lines = Files.lines(launcherPath)
                     .map(line -> {
                         if (line.endsWith("$@")) {
                             return line.replace("$@", commandlineArgs + " $@");
@@ -277,6 +286,7 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
         getLog().debug("image output: " + image.getAbsolutePath());
         if (image.exists()) {
             try {
+                //noinspection resource,ResultOfMethodCallIgnored
                 Files.walk(image.toPath())
                         .sorted(Comparator.reverseOrder())
                         .map(Path::toFile)
@@ -331,7 +341,8 @@ public class JavaFXJLinkMojo extends JavaFXBaseMojo {
 
     private File createZipArchiveFromImage() throws MojoExecutionException {
         File imageArchive = new File(builddir, jlinkImageName);
-        zipArchiver.addDirectory(imageArchive);
+        FileSet fileSet = new DefaultFileSet(imageArchive);
+        zipArchiver.addFileSet(fileSet);
 
         File resultArchive = new File(builddir, jlinkZipName + ".zip");
         zipArchiver.setDestFile(resultArchive);

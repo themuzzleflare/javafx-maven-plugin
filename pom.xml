@@ -49,7 +49,7 @@
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-archiver</artifactId>
-            <version>4.10.0</version>
+            <version>4.10.1</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-exec -->
@@ -220,7 +220,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <source>24</source>
+                            <source>${java.version}</source>
                         </configuration>
                     </plugin>
 

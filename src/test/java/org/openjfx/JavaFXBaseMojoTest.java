@@ -28,6 +28,7 @@ public class JavaFXBaseMojoTest {
 
     @AfterClass
     public static void destroy() throws IOException {
+        //noinspection resource,ResultOfMethodCallIgnored
         Files.walk(path.getParent())
                 .sorted(Comparator.reverseOrder())
                 .map(Path::toFile)

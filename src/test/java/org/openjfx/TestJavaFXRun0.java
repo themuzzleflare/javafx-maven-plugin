@@ -6,6 +6,7 @@ public class TestJavaFXRun0 {
     }
 
     public static void main(String[] args) {
+        //noinspection InstantiationOfUtilityClass
         new TestJavaFXRun0();
     }
 }

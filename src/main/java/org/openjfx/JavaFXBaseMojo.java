@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2025 Paul Tavitian.
+ */
+
 package org.openjfx;
 
 import org.apache.commons.exec.*;
@@ -75,17 +79,22 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
     List<String> modulepathElements;
     Map<String, JavaModuleDescriptor> pathElements;
     JavaModuleDescriptor moduleDescriptor;
+    @SuppressWarnings("unused")
     @Parameter(defaultValue = "${session}", readonly = true)
     private MavenSession session;
+    @SuppressWarnings({"deprecation", "unused"})
     @Component
     private BuildPluginManager pluginManager;
+    @SuppressWarnings({"deprecation", "unused"})
     @Component
     private LocationManager locationManager;
+    @SuppressWarnings({"unused", "MismatchedQueryAndUpdateOfCollection"})
     @Parameter(defaultValue = "${project.compileClasspathElements}", required = true)
     private List<String> compilePath;
     /**
      * If set to true the child process executes asynchronously and build execution continues in parallel.
      */
+    @SuppressWarnings("unused")
     @Parameter(property = "javafx.async", defaultValue = "false")
     private boolean async;
     /**
@@ -93,17 +102,20 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
      * child process continues execution after JVM shutdown. Applies only to asynchronous processes; ignored for
      * synchronous processes.
      */
+    @SuppressWarnings("unused")
     @Parameter(property = "javafx.asyncDestroyOnShutdown", defaultValue = "true")
     private boolean asyncDestroyOnShutdown;
     /**
      * If set to true, it will include the dependencies that
      * generate path exceptions in the classpath. Default is false.
      */
+    @SuppressWarnings("unused")
     @Parameter(property = "javafx.includePathExceptionsInClasspath", defaultValue = "false")
     private boolean includePathExceptionsInClasspath;
     /**
      *
      */
+    @SuppressWarnings({"deprecation", "unused"})
     @Component
     private ToolchainManager toolchainManager;
     private ProcessDestroyer processDestroyer;
@@ -438,7 +450,7 @@ abstract class JavaFXBaseMojo extends AbstractMojo {
     }
 
     int executeCommandLine(Executor exec, CommandLine commandLine, Map<String, String> enviro,
-                           OutputStream out, OutputStream err) throws IOException {
+                           OutputStream out, @SuppressWarnings("SameParameterValue") OutputStream err) throws IOException {
         // note: don't use BufferedOutputStream here since it delays the outputs MEXEC-138
         PumpStreamHandler psh = new PumpStreamHandler(out, err, System.in);
         return executeCommandLine(exec, commandLine, enviro, psh);

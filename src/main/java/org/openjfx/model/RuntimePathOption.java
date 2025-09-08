@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2025 Paul Tavitian.
+ */
+
 package org.openjfx.model;
 
 /**

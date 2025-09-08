@@ -51,10 +51,11 @@ class MavenArtifactResolver {
     }
 
     private RepositorySystem createRepositorySystem() {
-        DefaultServiceLocator serviceLocator = MavenRepositorySystemUtils.newServiceLocator();
+        @SuppressWarnings("deprecation") DefaultServiceLocator serviceLocator = MavenRepositorySystemUtils.newServiceLocator();
         serviceLocator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
         serviceLocator.addService(TransporterFactory.class, FileTransporterFactory.class);
         serviceLocator.addService(TransporterFactory.class, HttpTransporterFactory.class);
+        //noinspection deprecation
         serviceLocator.setErrorHandler(new DefaultServiceLocator.ErrorHandler() {
             @Override
             public void serviceCreationFailed(Class<?> type, Class<?> impl, Throwable exception) {
@@ -64,7 +65,7 @@ class MavenArtifactResolver {
         return serviceLocator.getService(RepositorySystem.class);
     }
 
-    private DefaultRepositorySystemSession createRepositorySystemSession(RepositorySystem system, String localRepoPath) {
+    private DefaultRepositorySystemSession createRepositorySystemSession(RepositorySystem system, @SuppressWarnings("SameParameterValue") String localRepoPath) {
         DefaultRepositorySystemSession systemSession = MavenRepositorySystemUtils.newSession();
         LocalRepository localRepo = new LocalRepository(localRepoPath);
         systemSession.setLocalRepositoryManager(system.newLocalRepositoryManager(systemSession, localRepo));
@@ -84,6 +85,7 @@ class MavenArtifactResolver {
             List<ArtifactResult> results = repositorySystem.resolveArtifacts(systemSession, artifactRequests);
             resolvedArtifact = results.getLast();
         } catch (ArtifactResolutionException e) {
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
             return null;
         }
@@ -100,6 +102,7 @@ class MavenArtifactResolver {
             artifactResults = repositorySystem.resolveDependencies(systemSession, dependencyRequest)
                     .getArtifactResults();
         } catch (DependencyResolutionException e) {
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
             return null;
         }

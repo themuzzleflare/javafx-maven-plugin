@@ -39,6 +39,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
+    @SuppressWarnings("unused")
     private static final File LOCAL_REPO = new File("src/test/repository");
     private static final String SOME_EXECUTABLE = UUID.randomUUID().toString();
 
@@ -121,7 +122,7 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
 
     private String execute(AbstractMojo mojo) throws MojoFailureException, MojoExecutionException, InterruptedException {
         PrintStream out = System.out;
-        StringOutputStream stringOutputStream = new StringOutputStream();
+        @SuppressWarnings("deprecation") StringOutputStream stringOutputStream = new StringOutputStream();
         System.setOut(new PrintStream(stringOutputStream));
         mojo.setLog(new DefaultLog(new ConsoleLogger(Logger.LEVEL_ERROR, "javafx:run")));
 
@@ -138,12 +139,14 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
     private void setUpProject(File pomFile, AbstractMojo mojo) throws Exception {
         super.setUp();
 
+        //noinspection resource
         MockitoAnnotations.openMocks(this);
 
         ProjectBuildingRequest buildingRequest = mock(ProjectBuildingRequest.class);
         buildingRequest.setResolveDependencies(true);
         when(session.getProjectBuildingRequest()).thenReturn(buildingRequest);
         DefaultRepositorySystemSession repositorySession = MavenRepositorySystemUtils.newSession();
+        //noinspection deprecation
         repositorySession.setLocalRepositoryManager(new SimpleLocalRepositoryManagerFactory()
                 .newInstance(repositorySession, new LocalRepository(RepositorySystem.defaultUserLocalRepository)));
         when(buildingRequest.getRepositorySession()).thenReturn(repositorySession);
@@ -224,7 +227,7 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
         public int executeResult;
 
         @Override
-        protected int executeCommandLine(Executor exec, CommandLine commandLine, Map enviro, OutputStream out,
+        protected int executeCommandLine(Executor exec, CommandLine commandLine, @SuppressWarnings("rawtypes") Map enviro, OutputStream out,
                                          OutputStream err) throws IOException {
             commandLines.add(commandLine);
             if (failureMsg != null) {
@@ -237,7 +240,7 @@ public class JavaFXRunMojoTestCase extends AbstractMojoTestCase {
             return commandLines.size();
         }
 
-        CommandLine getExecutedCommandline(int index) {
+        CommandLine getExecutedCommandline(@SuppressWarnings("SameParameterValue") int index) {
             return commandLines.get(index);
         }
     }

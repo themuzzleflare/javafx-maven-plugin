@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2025 Paul Tavitian.
+ */
+
 package org.openjfx;
 
 import org.apache.commons.exec.CommandLine;
@@ -83,6 +87,7 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
                 }
             } catch (ExecuteException e) {
                 getLog().error("Command execution failed.", e);
+                //noinspection CallToPrintStackTrace
                 e.printStackTrace();
                 throw new MojoExecutionException("Command execution failed.", e);
             } catch (IOException e) {
@@ -197,7 +202,7 @@ public class JavaFXRunMojo extends JavaFXBaseMojo {
         this.basedir = basedir;
     }
 
-    void setCommandlineArgs(String commandlineArgs) {
+    void setCommandlineArgs(@SuppressWarnings("SameParameterValue") String commandlineArgs) {
         this.commandlineArgs = commandlineArgs;
     }
 
